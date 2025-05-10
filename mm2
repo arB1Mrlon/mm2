@@ -1,0 +1,675 @@
+--[[
+    Ultimate Murder Mystery 2 Mega Mod Menu
+    Features:
+    - Script Gun with visible kills
+    - Fly Hack (WASD + Space/Shift)
+    - Auto Aim (Head)
+    - NoClip
+    - ESP with role colors
+    - Auto Kill with teleport
+    - God Mode
+    - Speed Hack
+    - Infinite Jump
+    - Wall Bang
+]]
+
+local Player = game:GetService("Players").LocalPlayer
+local Mouse = Player:GetMouse()
+local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local HttpService = game:GetService("HttpService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+-- Создаем GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = HttpService:GenerateGUID(false)
+ScreenGui.Parent = game:GetService("CoreGui")
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 350, 0, 500)
+MainFrame.Position = UDim2.new(0.5, -175, 0.5, -250)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+MainFrame.BackgroundTransparency = 0.05
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.ClipsDescendants = true
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 8)
+UICorner.Parent = MainFrame
+
+local TitleBar = Instance.new("Frame")
+TitleBar.Size = UDim2.new(1, 0, 0, 35)
+TitleBar.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+TitleBar.BorderSizePixel = 0
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(0.8, 0, 1, 0)
+Title.Position = UDim2.new(0.1, 0, 0, 0)
+Title.Text = "MM2 MEGA MOD"
+Title.TextColor3 = Color3.fromRGB(220, 220, 220)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 16
+
+local CloseButton = Instance.new("TextButton")
+CloseButton.Size = UDim2.new(0, 35, 0, 35)
+CloseButton.Position = UDim2.new(1, -35, 0, 0)
+CloseButton.Text = "X"
+CloseButton.TextColor3 = Color3.fromRGB(220, 220, 220)
+CloseButton.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
+CloseButton.TextSize = 18
+CloseButton.Font = Enum.Font.GothamBold
+
+local ScrollingFrame = Instance.new("ScrollingFrame")
+ScrollingFrame.Size = UDim2.new(1, 0, 1, -35)
+ScrollingFrame.Position = UDim2.new(0, 0, 0, 35)
+ScrollingFrame.BackgroundTransparency = 1
+ScrollingFrame.ScrollBarThickness = 4
+ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 950)
+
+-- Собираем интерфейс
+TitleBar.Parent = MainFrame
+Title.Parent = TitleBar
+CloseButton.Parent = TitleBar
+ScrollingFrame.Parent = MainFrame
+MainFrame.Parent = ScreenGui
+
+-- Стилизация кнопки закрытия
+CloseButton.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
+
+-- Функции для создания элементов интерфейса
+local function CreateToggleButton(text, description, default, callback)
+    local ButtonFrame = Instance.new("Frame")
+    ButtonFrame.Size = UDim2.new(0.9, 0, 0, 50)
+    ButtonFrame.Position = UDim2.new(0.05, 0, 0, #ScrollingFrame:GetChildren() * 55)
+    ButtonFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+    ButtonFrame.BorderSizePixel = 0
+
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(0, 6)
+    Corner.Parent = ButtonFrame
+
+    local Button = Instance.new("TextButton")
+    Button.Size = UDim2.new(1, 0, 1, 0)
+    Button.BackgroundTransparency = 1
+    Button.Text = ""
+    Button.ZIndex = 2
+
+    local TitleLabel = Instance.new("TextLabel")
+    TitleLabel.Size = UDim2.new(0.7, 0, 0.6, 0)
+    TitleLabel.Position = UDim2.new(0.05, 0, 0.1, 0)
+    TitleLabel.Text = text
+    TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    TitleLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+    TitleLabel.BackgroundTransparency = 1
+    TitleLabel.Font = Enum.Font.GothamSemibold
+    TitleLabel.TextSize = 14
+
+    local DescLabel = Instance.new("TextLabel")
+    DescLabel.Size = UDim2.new(0.7, 0, 0.4, 0)
+    DescLabel.Position = UDim2.new(0.05, 0, 0.6, 0)
+    DescLabel.Text = description
+    DescLabel.TextXAlignment = Enum.TextXAlignment.Left
+    DescLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+    DescLabel.BackgroundTransparency = 1
+    DescLabel.Font = Enum.Font.Gotham
+    DescLabel.TextSize = 12
+
+    local ToggleFrame = Instance.new("Frame")
+    ToggleFrame.Size = UDim2.new(0, 40, 0, 20)
+    ToggleFrame.Position = UDim2.new(0.85, -40, 0.5, -10)
+    ToggleFrame.BackgroundColor3 = default and Color3.fromRGB(80, 180, 80) or Color3.fromRGB(60, 60, 65)
+    ToggleFrame.BorderSizePixel = 0
+
+    local ToggleCorner = Instance.new("UICorner")
+    ToggleCorner.CornerRadius = UDim.new(1, 0)
+    ToggleCorner.Parent = ToggleFrame
+
+    local ToggleDot = Instance.new("Frame")
+    ToggleDot.Size = UDim2.new(0, 16, 0, 16)
+    ToggleDot.Position = default and UDim2.new(0, 22, 0, 2) or UDim2.new(0, 2, 0, 2)
+    ToggleDot.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
+    ToggleDot.BorderSizePixel = 0
+
+    local DotCorner = Instance.new("UICorner")
+    DotCorner.CornerRadius = UDim.new(1, 0)
+    DotCorner.Parent = ToggleDot
+
+    local isEnabled = default
+
+    local function UpdateToggle()
+        if isEnabled then
+            TweenService:Create(ToggleDot, TweenInfo.new(0.2), {
+                Position = UDim2.new(0, 22, 0, 2),
+                BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            }):Play()
+            TweenService:Create(ToggleFrame, TweenInfo.new(0.2), {
+                BackgroundColor3 = Color3.fromRGB(80, 180, 80)
+            }):Play()
+        else
+            TweenService:Create(ToggleDot, TweenInfo.new(0.2), {
+                Position = UDim2.new(0, 2, 0, 2),
+                BackgroundColor3 = Color3.fromRGB(220, 220, 220)
+            }):Play()
+            TweenService:Create(ToggleFrame, TweenInfo.new(0.2), {
+                BackgroundColor3 = Color3.fromRGB(60, 60, 65)
+            }):Play()
+        end
+    end
+
+    Button.MouseButton1Click:Connect(function()
+        isEnabled = not isEnabled
+        UpdateToggle()
+        callback(isEnabled)
+    end)
+
+    Button.MouseEnter:Connect(function()
+        TweenService:Create(ButtonFrame, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(50, 50, 55)
+        }):Play()
+    end)
+
+    Button.MouseLeave:Connect(function()
+        TweenService:Create(ButtonFrame, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+        }):Play()
+    end)
+
+    ToggleDot.Parent = ToggleFrame
+    Button.Parent = ButtonFrame
+    TitleLabel.Parent = ButtonFrame
+    DescLabel.Parent = ButtonFrame
+    ToggleFrame.Parent = ButtonFrame
+    ButtonFrame.Parent = ScrollingFrame
+
+    UpdateToggle()
+
+    return {
+        SetEnabled = function(state)
+            isEnabled = state
+            UpdateToggle()
+        end
+    }
+end
+
+local function CreateActionButton(text, description, callback)
+    local ButtonFrame = Instance.new("Frame")
+    ButtonFrame.Size = UDim2.new(0.9, 0, 0, 50)
+    ButtonFrame.Position = UDim2.new(0.05, 0, 0, #ScrollingFrame:GetChildren() * 55)
+    ButtonFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+    ButtonFrame.BorderSizePixel = 0
+
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(0, 6)
+    Corner.Parent = ButtonFrame
+
+    local Button = Instance.new("TextButton")
+    Button.Size = UDim2.new(1, 0, 1, 0)
+    Button.BackgroundTransparency = 1
+    Button.Text = ""
+    Button.ZIndex = 2
+
+    local TitleLabel = Instance.new("TextLabel")
+    TitleLabel.Size = UDim2.new(0.8, 0, 0.6, 0)
+    TitleLabel.Position = UDim2.new(0.1, 0, 0.1, 0)
+    TitleLabel.Text = text
+    TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    TitleLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+    TitleLabel.BackgroundTransparency = 1
+    TitleLabel.Font = Enum.Font.GothamSemibold
+    TitleLabel.TextSize = 14
+
+    local DescLabel = Instance.new("TextLabel")
+    DescLabel.Size = UDim2.new(0.8, 0, 0.4, 0)
+    DescLabel.Position = UDim2.new(0.1, 0, 0.6, 0)
+    DescLabel.Text = description
+    DescLabel.TextXAlignment = Enum.TextXAlignment.Left
+    DescLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+    DescLabel.BackgroundTransparency = 1
+    DescLabel.Font = Enum.Font.Gotham
+    DescLabel.TextSize = 12
+
+    Button.MouseButton1Click:Connect(callback)
+
+    Button.MouseEnter:Connect(function()
+        TweenService:Create(ButtonFrame, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(50, 50, 55)
+        }):Play()
+    end)
+
+    Button.MouseLeave:Connect(function()
+        TweenService:Create(ButtonFrame, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+        }):Play()
+    end)
+
+    Button.Parent = ButtonFrame
+    TitleLabel.Parent = ButtonFrame
+    DescLabel.Parent = ButtonFrame
+    ButtonFrame.Parent = ScrollingFrame
+end
+
+-- Переменные для функций
+local FlyActive = false
+local AutoAimActive = false
+local NoClipActive = false
+local ESPActive = false
+local GodModeActive = false
+local SpeedHackActive = false
+local InfiniteJumpActive = false
+local WallBangActive = false
+local AutoKillActive = false
+local GunEquipped = false
+
+-- Script Gun с видимыми убийствами
+local function CreateScriptGun()
+    if GunEquipped then return end
+    
+    local gun = Instance.new("Tool")
+    gun.Name = "Script Gun"
+    gun.RequiresHandle = false
+    
+    local handle = Instance.new("Part")
+    handle.Name = "Handle"
+    handle.Size = Vector3.new(0.5, 0.5, 2)
+    handle.Transparency = 0.5
+    handle.Color = Color3.fromRGB(255, 0, 0)
+    handle.Parent = gun
+    
+    local mesh = Instance.new("SpecialMesh")
+    mesh.MeshType = Enum.MeshType.Cylinder
+    mesh.Scale = Vector3.new(0.5, 2, 0.5)
+    mesh.Parent = handle
+    
+    -- Функция стрельбы
+    gun.Activated:Connect(function()
+        if not Player.Character or not Player.Character:FindFirstChild("HumanoidRootPart") then return end
+        
+        -- Создаем видимую пулю
+        local bullet = Instance.new("Part")
+        bullet.Size = Vector3.new(0.2, 0.2, 1)
+        bullet.CFrame = Player.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -2)
+        bullet.Velocity = Player.Character.HumanoidRootPart.CFrame.LookVector * 500
+        bullet.CanCollide = false
+        bullet.Anchored = false
+        bullet.Transparency = 0.5
+        bullet.Color = Color3.fromRGB(255, 255, 0)
+        bullet.Parent = workspace
+        
+        -- Эффект попадания
+        bullet.Touched:Connect(function(hit)
+            local humanoid = hit.Parent:FindFirstChildOfClass("Humanoid") or hit.Parent.Parent:FindFirstChildOfClass("Humanoid")
+            if humanoid and humanoid.Parent ~= Player.Character then
+                -- Видимое убийство через RemoteEvent
+                local remote = ReplicatedStorage:FindFirstChild("HitRemote") or Instance.new("RemoteEvent", ReplicatedStorage)
+                remote.Name = "HitRemote"
+                remote:FireServer({
+                    ["Weapon"] = gun,
+                    ["Victim"] = humanoid,
+                    ["Hit"] = hit,
+                    ["Damage"] = 100
+                })
+                bullet:Destroy()
+            end
+        end)
+        
+        -- Автоудаление пули
+        delay(3, function()
+            if bullet then
+                bullet:Destroy()
+            end
+        end)
+    end)
+    
+    gun.Parent = Player.Backpack
+    GunEquipped = true
+end
+
+-- Исправленный Fly Hack
+local function Fly()
+    local bodyVelocity = Instance.new("BodyVelocity")
+    bodyVelocity.MaxForce = Vector3.new(4000, 4000, 4000)
+    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+    bodyVelocity.Parent = Player.Character.HumanoidRootPart
+
+    local flyConnection
+    flyConnection = RunService.Heartbeat:Connect(function()
+        if FlyActive and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+            local root = Player.Character.HumanoidRootPart
+            local camera = workspace.CurrentCamera
+            local moveDirection = Vector3.new(0, 0, 0)
+            
+            -- Управление полетом
+            if UIS:IsKeyDown(Enum.KeyCode.W) then
+                moveDirection = moveDirection + camera.CFrame.LookVector
+            end
+            if UIS:IsKeyDown(Enum.KeyCode.S) then
+                moveDirection = moveDirection - camera.CFrame.LookVector
+            end
+            if UIS:IsKeyDown(Enum.KeyCode.D) then
+                moveDirection = moveDirection + camera.CFrame.RightVector
+            end
+            if UIS:IsKeyDown(Enum.KeyCode.A) then
+                moveDirection = moveDirection - camera.CFrame.RightVector
+            end
+            if UIS:IsKeyDown(Enum.KeyCode.Space) then
+                moveDirection = moveDirection + Vector3.new(0, 1, 0)
+            end
+            if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then
+                moveDirection = moveDirection + Vector3.new(0, -1, 0)
+            end
+            
+            -- Нормализация и применение скорости
+            if moveDirection.Magnitude > 0 then
+                moveDirection = moveDirection.Unit * 100
+            end
+            
+            bodyVelocity.Velocity = moveDirection
+        else
+            if bodyVelocity then
+                bodyVelocity:Destroy()
+            end
+            if flyConnection then
+                flyConnection:Disconnect()
+            end
+        end
+    end)
+end
+
+-- Рабочий Auto Kill
+local function AutoKill()
+    while AutoKillActive and task.wait(0.5) do
+        if not Player.Character or not Player.Character:FindFirstChild("HumanoidRootPart") then
+            continue
+        end
+
+        local knife = Player.Backpack:FindFirstChild("Knife") or Player.Character:FindFirstChild("Knife")
+        local gun = Player.Backpack:FindFirstChild("Gun") or Player.Character:FindFirstChild("Gun")
+        
+        for _, target in ipairs(game:GetService("Players"):GetPlayers()) do
+            if target ~= Player and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+                -- Телепортация к цели
+                Player.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -2)
+                
+                -- Атака с видимым эффектом
+                local remote = ReplicatedStorage:FindFirstChild("HitRemote") or Instance.new("RemoteEvent", ReplicatedStorage)
+                remote.Name = "HitRemote"
+                
+                if knife then
+                    remote:FireServer({
+                        ["Weapon"] = knife,
+                        ["Victim"] = target.Character:FindFirstChildOfClass("Humanoid"),
+                        ["Hit"] = target.Character:FindFirstChild("Head") or target.Character:FindFirstChildOfClass("BasePart"),
+                        ["Damage"] = 100
+                    })
+                elseif gun then
+                    remote:FireServer({
+                        ["Weapon"] = gun,
+                        ["Victim"] = target.Character:FindFirstChildOfClass("Humanoid"),
+                        ["Hit"] = target.Character:FindFirstChild("Head") or target.Character:FindFirstChildOfClass("BasePart"),
+                        ["Damage"] = 100
+                    })
+                end
+                
+                task.wait(0.2)
+            end
+        end
+    end
+end
+
+-- ESP с цветами по ролям
+local function UpdateESP()
+    for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+        if player ~= Player and player.Character then
+            local oldESP = player.Character:FindFirstChild("MM2_ESP")
+            if oldESP then oldESP:Destroy() end
+
+            if ESPActive then
+                local highlight = Instance.new("Highlight")
+                highlight.Name = "MM2_ESP"
+                
+                -- Определяем роль
+                if player.Backpack:FindFirstChild("Knife") or player.Character:FindFirstChild("Knife") then
+                    highlight.FillColor = Color3.fromRGB(255, 50, 50) -- Красный для убийцы
+                elseif player.Backpack:FindFirstChild("Gun") or player.Character:FindFirstChild("Gun") then
+                    highlight.FillColor = Color3.fromRGB(50, 50, 255) -- Синий для шерифа
+                elseif player.Backpack:FindFirstChild("Hero") or player.Character:FindFirstChild("Hero") then
+                    highlight.FillColor = Color3.fromRGB(255, 255, 50) -- Желтый для героя
+                else
+                    highlight.FillColor = Color3.fromRGB(50, 255, 50) -- Зеленый для невинных
+                end
+                
+                highlight.Parent = player.Character
+            end
+        end
+    end
+end
+
+-- NoClip
+local function NoClip()
+    RunService.Stepped:Connect(function()
+        if NoClipActive and Player.Character then
+            for _, part in ipairs(Player.Character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+        end
+    end)
+end
+
+-- God Mode
+local function GodMode()
+    if GodModeActive and Player.Character then
+        local humanoid = Player.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.MaxHealth = math.huge
+            humanoid.Health = math.huge
+        end
+    end
+end
+
+-- Speed Hack
+local function SpeedHack()
+    if SpeedHackActive and Player.Character then
+        local humanoid = Player.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = 32
+        end
+    else
+        if Player.Character then
+            local humanoid = Player.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = 16
+            end
+        end
+    end
+end
+
+-- Infinite Jump
+local function InfiniteJump()
+    UIS.JumpRequest:Connect(function()
+        if InfiniteJumpActive and Player.Character then
+            local humanoid = Player.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+            end
+        end
+    end)
+end
+
+-- Wall Bang
+local function WallBang()
+    if WallBangActive then
+        for _, part in ipairs(workspace:GetDescendants()) do
+            if part.Name == "Bullet" and part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+    end
+end
+
+-- Auto Aim
+local function AutoAim()
+    local lastTarget = nil
+    local smoothness = 0.15 -- Коэффициент плавности
+    
+    while AutoAimActive and task.wait() do
+        if not Player.Character or not Player.Character:FindFirstChild("HumanoidRootPart") then
+            continue
+        end
+        
+        -- Поиск ближайшей цели
+        local closestPlayer = nil
+        local closestDistance = math.huge
+        local myPos = Player.Character.HumanoidRootPart.Position
+        
+        for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+            if player ~= Player and player.Character and player.Character:FindFirstChild("Head") then
+                local distance = (myPos - player.Character.Head.Position).Magnitude
+                if distance < closestDistance then
+                    closestDistance = distance
+                    closestPlayer = player
+                end
+            end
+        end
+        
+        -- Плавное наведение
+        if closestPlayer then
+            local targetHead = closestPlayer.Character.Head
+            local myRoot = Player.Character.HumanoidRootPart
+            
+            if lastTarget ~= closestPlayer then
+                lastTarget = closestPlayer
+            end
+            
+            -- Плавное перемещение взгляда к голове
+            local targetCFrame = CFrame.new(myRoot.Position, targetHead.Position)
+            myRoot.CFrame = myRoot.CFrame:Lerp(targetCFrame, smoothness)
+        end
+    end
+end
+
+-- Создаем элементы меню
+CreateActionButton("Создать Script Gun", "Создает пистолет с видимыми убийствами", CreateScriptGun)
+
+CreateToggleButton("Флай (WASD+Space/Shift)", "Плавный полет", false, function(state)
+    FlyActive = state
+    if state then
+        Fly()
+    end
+end)
+
+CreateToggleButton("Авто-прицел в голову", "Плавное наведение на голову", false, function(state)
+    AutoAimActive = state
+    if state then
+        spawn(AutoAim)
+    end
+end)
+
+CreateToggleButton("NoClip", "Проходите сквозь стены", false, function(state)
+    NoClipActive = state
+    if state then
+        NoClip()
+    end
+end)
+
+CreateToggleButton("ESP игроков", "Подсветка по ролям", false, function(state)
+    ESPActive = state
+    if state then
+        spawn(function()
+            while ESPActive do
+                UpdateESP()
+                task.wait(1)
+            end
+        end)
+    else
+        for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+            if player.Character then
+                local esp = player.Character:FindFirstChild("MM2_ESP")
+                if esp then esp:Destroy() end
+            end
+        end
+    end
+end)
+
+CreateToggleButton("Автокилл", "Телепортация и убийство", false, function(state)
+    AutoKillActive = state
+    if state then
+        spawn(AutoKill)
+    end
+end)
+
+CreateToggleButton("Бессмертие", "Вы неуязвимы", false, function(state)
+    GodModeActive = state
+    if state then
+        spawn(function()
+            while GodModeActive do
+                GodMode()
+                task.wait(0.5)
+            end
+        end)
+    end
+end)
+
+CreateToggleButton("Скорость x2", "Быстрое передвижение", false, function(state)
+    SpeedHackActive = state
+    if state then
+        SpeedHack()
+    end
+end)
+
+CreateToggleButton("Беск. прыжок", "Прыгайте в воздухе", false, function(state)
+    InfiniteJumpActive = state
+    if state then
+        InfiniteJump()
+    end
+end)
+
+CreateToggleButton("Прох. пуль", "Пули через стены", false, function(state)
+    WallBangActive = state
+    if state then
+        spawn(function()
+            while WallBangActive do
+                WallBang()
+                task.wait(0.1)
+            end
+        end)
+    end
+end)
+
+-- Горячая клавиша (F6)
+local MenuVisible = true
+UIS.InputBegan:Connect(function(input, gameProcessed)
+    if input.KeyCode == Enum.KeyCode.F6 and not gameProcessed then
+        MenuVisible = not MenuVisible
+        MainFrame.Visible = MenuVisible
+    end
+end)
+
+-- Автообновление после смерти
+Player.CharacterAdded:Connect(function(character)
+    if GodModeActive then
+        task.wait(1)
+        GodMode()
+    end
+    if SpeedHackActive then
+        task.wait(1)
+        SpeedHack()
+    end
+    if ESPActive then
+        task.wait(1)
+        UpdateESP()
+    end
+    if GunEquipped then
+        task.wait(1)
+        CreateScriptGun()
+    end
+end)
+
+print("[MM2 Mega Mod] Меню загружено! Нажмите F6 для открытия/закрытия.")
